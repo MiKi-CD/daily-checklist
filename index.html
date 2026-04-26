@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="theme-color" content="#0e0e0e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="Checklist">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<title>Daily Checklist</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0e0e0e;
+    --card: #181818;
+    --border: #2a2a2a;
+    --accent: #c8f04a;
+    --accent-dim: rgba(200,240,74,0.12);
+    --text: #f0f0f0;
+    --muted: #666;
+    --done-bg: #1a1f10;
+    --done-text: #5a6e2a;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    padding: 0 0 40px 0;
+    max-width: 420px;
+    margin: 0 auto;
+  }
+
+  header {
+    padding: 28px 20px 16px;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    background: var(--bg);
+    z-index: 10;
+  }
+
+  .header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+
+  .day-label {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 38px;
+    letter-spacing: 2px;
+    line-height: 1;
+    color: var(--text);
+  }
+
+  .date-sub {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 4px;
+    font-weight: 300;
+    letter-spacing: 0.5px;
+  }
+
+  .progress-pill {
+    background: var(--accent-dim);
+    border: 1px solid var(--accent);
+    border-radius: 20px;
+    padding: 6px 14px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 20px;
+    color: var(--accent);
+    letter-spacing: 1px;
+  }
+
+  .progress-bar-wrap {
+    margin-top: 14px;
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 2px;
+    transition: width 0.4s ease;
+  }
+
+  .section {
+    padding: 20px 20px 0;
+  }
+
+  .section-title {
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 500;
+    margin-bottom: 10px;
+  }
+
+  .task {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    user-select: none;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .task:active { transform: scale(0.98); }
+
+  .task.done {
+    background: var(--done-bg);
+    border-color: #2a3515;
+  }
+
+  .task.done .task-label {
+    color: var(--done-text);
+    text-decoration: line-through;
+    text-decoration-color: #3a4e1a;
+  }
+
+  .task.done .task-meta { color: #3a4e1a; }
+
+  .checkbox {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    background: transparent;
+  }
+
+  .task.done .checkbox {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .check-icon {
+    opacity: 0;
+    transition: opacity 0.2s;
+    font-size: 12px;
+    color: #0e0e0e;
+    font-weight: 700;
+  }
+
+  .task.done .check-icon { opacity: 1; }
+
+  .task-text { flex: 1; }
+
+  .task-label {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+    line-height: 1.3;
+    transition: color 0.2s;
+  }
+
+  .task-meta {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 2px;
+    font-weight: 300;
+  }
+
+  .task-time {
+    font-size: 11px;
+    color: var(--muted);
+    font-weight: 300;
+    flex-shrink: 0;
+  }
+
+  .nonveg-badge {
+    position: absolute;
+    right: 12px;
+    top: 10px;
+    font-size: 9px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    background: rgba(255,160,60,0.12);
+    color: #ffa03c;
+    border: 1px solid rgba(255,160,60,0.3);
+    border-radius: 6px;
+    padding: 2px 7px;
+  }
+
+  .veg-badge {
+    position: absolute;
+    right: 12px;
+    top: 10px;
+    font-size: 9px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    background: rgba(200,240,74,0.08);
+    color: var(--accent);
+    border: 1px solid rgba(200,240,74,0.2);
+    border-radius: 6px;
+    padding: 2px 7px;
+  }
+
+  .reset-btn {
+    display: block;
+    margin: 28px 20px 0;
+    width: calc(100% - 40px);
+    padding: 14px;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    color: var(--muted);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    letter-spacing: 1px;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: all 0.2s;
+  }
+
+  .reset-btn:hover { border-color: #444; color: #888; }
+
+  .streak-row {
+    display: flex;
+    gap: 6px;
+    padding: 16px 20px 0;
+  }
+
+  .streak-day { flex: 1; text-align: center; }
+
+  .streak-dot {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    margin: 0 auto 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 9px;
+    color: var(--muted);
+    font-weight: 500;
+  }
+
+  .streak-dot.complete { background: var(--accent); border-color: var(--accent); color: #0e0e0e; font-weight: 700; }
+  .streak-dot.today { border-color: var(--accent); color: var(--accent); }
+
+  .streak-label { font-size: 9px; color: var(--muted); letter-spacing: 0.5px; }
+
+  .all-done-banner {
+    display: none;
+    margin: 20px 20px 0;
+    padding: 16px;
+    background: var(--accent-dim);
+    border: 1px solid var(--accent);
+    border-radius: 12px;
+    text-align: center;
+  }
+
+  .all-done-banner.show { display: block; }
+  .all-done-banner .big { font-family: 'Bebas Neue', sans-serif; font-size: 28px; color: var(--accent); letter-spacing: 2px; }
+  .all-done-banner .sub { font-size: 12px; color: #8a9a5a; margin-top: 2px; }
+
+  #installBtn {
+    display: none;
+    margin: 16px 20px 0;
+    width: calc(100% - 40px);
+    padding: 14px;
+    background: var(--accent);
+    border: none;
+    border-radius: 12px;
+    color: #0e0e0e;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  #installBtn.show { display: block; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-top">
+    <div>
+      <div class="day-label" id="dayLabel">MONDAY</div>
+      <div class="date-sub" id="dateLabel">Loading...</div>
+    </div>
+    <div class="progress-pill" id="progressPill">0/8</div>
+  </div>
+  <div class="progress-bar-wrap">
+    <div class="progress-bar-fill" id="progressBar" style="width:0%"></div>
+  </div>
+</header>
+
+<button id="installBtn" onclick="installApp()">⬇ Add to Home Screen</button>
+
+<div class="streak-row" id="streakRow"></div>
+
+<div class="all-done-banner" id="allDoneBanner">
+  <div class="big">LOCKED IN 🔒</div>
+  <div class="sub">All done for today. Rest, recover, repeat.</div>
+</div>
+
+<div class="section">
+  <div class="section-title">Morning</div>
+  <div class="task" data-id="wake" onclick="toggle(this)">
+    <div class="checkbox"><span class="check-icon">✓</span></div>
+    <div class="task-text">
+      <div class="task-label">Wake up</div>
+      <div class="task-meta">Out of bed, no snooze</div>
+    </div>
+    <div class="task-time">7:30 AM</div>
+  </div>
+  <div class="task" data-id="breakfast" onclick="toggle(this)">
+    <div class="checkbox"><span class="check-icon">✓</span></div>
+    <div class="task-text">
+      <div class="task-label">Breakfast within 30 mins</div>
+      <div class="task-meta" id="eggMeta">Loading...</div>
+    </div>
+    <div class="task-time">8:00 AM</div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">Afternoon</div>
+  <div class="task" data-id="lunch" onclick="toggle(this)">
+    <div class="checkbox"><span class="check-icon">✓</span></div>
+    <div class="task-text">
+      <div class="task-label">Lunch</div>
+      <div class="task-meta">Full plate — rice + dal/curry. Don't restrict.</div>
+    </div>
+    <div class="task-time">1:00 PM</div>
+  </div>
+  <div class="task" data-id="curd" onclick="toggle(this)">
+    <div class="checkbox"><span class="check-icon">✓</span></div>
+    <div class="task-text">
+      <div class="task-label">Curd</div>
+      <div class="task-meta">200g — 1 small bowl with lunch</div>
+    </div>
+    <div class="task-time">1:00 PM</div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">Evening</div>
+  <div class="task" data-id="peanuts" onclick="toggle(this)">
+    <div class="checkbox"><span class="check-icon">✓</span></div>
+    <div class="task-text">
+      <div class="task-label">Peanuts snack</div>
+      <div class="task-meta">30g — one closed fistful</div>
+    </div>
+    <div class="task-time">6:00 PM</div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">Night</div>
+  <div class="task" data-id="dinner" onclick="toggle(this)">
+    <div class="checkbox"><span class="check-icon">✓</span></div>
+    <div class="task-text">
+      <div class="task-label">Dinner</div>
+      <div class="task-meta">Full meal — hard cap</div>
+    </div>
+    <div class="task-time">8:00 PM</div>
+  </div>
+  <div class="task" data-id="nodinner" onclick="toggle(this)">
+    <div class="checkbox"><span class="check-icon">✓</span></div>
+    <div class="task-text">
+      <div class="task-label">No eating after 9 PM</div>
+      <div class="task-meta">Kitchen closed</div>
+    </div>
+    <div class="task-time">9:00 PM</div>
+  </div>
+  <div class="task" data-id="sleep" onclick="toggle(this)">
+    <div class="checkbox"><span class="check-icon">✓</span></div>
+    <div class="task-text">
+      <div class="task-label">Sleep</div>
+      <div class="task-meta">Phone down, lights off</div>
+    </div>
+    <div class="task-time">11:30 PM</div>
+  </div>
+</div>
+
+<button class="reset-btn" onclick="resetDay()">↺ Reset Today</button>
+
+<script>
+  const TASKS = ['wake','breakfast','lunch','curd','peanuts','dinner','nodinner','sleep'];
+  const TOTAL = TASKS.length;
+  const NON_VEG_DAYS = [0, 1, 3, 5]; // Sun, Mon, Wed, Fri
+
+  let deferredPrompt = null;
+
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    document.getElementById('installBtn').classList.add('show');
+  });
+
+  window.addEventListener('appinstalled', () => {
+    document.getElementById('installBtn').classList.remove('show');
+    deferredPrompt = null;
+  });
+
+  function installApp() {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.then(() => {
+        deferredPrompt = null;
+        document.getElementById('installBtn').classList.remove('show');
+      });
+    }
+  }
+
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js');
+    });
+  }
+
+  function getTodayKey() {
+    const d = new Date();
+    return `checklist_${d.getFullYear()}_${d.getMonth()}_${d.getDate()}`;
+  }
+
+  function loadState() {
+    try { return JSON.parse(localStorage.getItem(getTodayKey())) || {}; }
+    catch { return {}; }
+  }
+
+  function saveState(state) {
+    localStorage.setItem(getTodayKey(), JSON.stringify(state));
+  }
+
+  function toggle(el) {
+    const id = el.dataset.id;
+    const state = loadState();
+    state[id] = !state[id];
+    saveState(state);
+    render();
+  }
+
+  function resetDay() {
+    localStorage.removeItem(getTodayKey());
+    render();
+  }
+
+  function render() {
+    const now = new Date();
+    const dayNames = ['SUNDAY','MONDAY','TUESDAY','WEDNESDAY','THURSDAY','FRIDAY','SATURDAY'];
+    const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const dow = now.getDay();
+
+    document.getElementById('dayLabel').textContent = dayNames[dow];
+    document.getElementById('dateLabel').textContent = `${now.getDate()} ${monthNames[now.getMonth()]} ${now.getFullYear()} · Phase 1`;
+
+    const isNonVeg = NON_VEG_DAYS.includes(dow);
+    const eggCount = isNonVeg ? 3 : 5;
+    document.getElementById('eggMeta').textContent = `${eggCount} eggs + family breakfast`;
+
+    const bfTask = document.querySelector('[data-id="breakfast"]');
+    let badge = bfTask.querySelector('.nonveg-badge, .veg-badge');
+    if (badge) badge.remove();
+    const newBadge = document.createElement('span');
+    newBadge.className = isNonVeg ? 'nonveg-badge' : 'veg-badge';
+    newBadge.textContent = isNonVeg ? 'Non-Veg' : 'Veg';
+    bfTask.appendChild(newBadge);
+
+    const state = loadState();
+    let doneCount = 0;
+
+    TASKS.forEach(id => {
+      const el = document.querySelector(`[data-id="${id}"]`);
+      if (!el) return;
+      if (state[id]) { el.classList.add('done'); doneCount++; }
+      else { el.classList.remove('done'); }
+    });
+
+    document.getElementById('progressPill').textContent = `${doneCount}/${TOTAL}`;
+    document.getElementById('progressBar').style.width = `${(doneCount/TOTAL)*100}%`;
+
+    const banner = document.getElementById('allDoneBanner');
+    if (doneCount === TOTAL) banner.classList.add('show');
+    else banner.classList.remove('show');
+
+    renderStreak(now);
+  }
+
+  function renderStreak(now) {
+    const row = document.getElementById('streakRow');
+    row.innerHTML = '';
+    const days = ['S','M','T','W','T','F','S'];
+
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(now);
+      d.setDate(d.getDate() - i);
+      const key = `checklist_${d.getFullYear()}_${d.getMonth()}_${d.getDate()}`;
+      let state = {};
+      try { state = JSON.parse(localStorage.getItem(key)) || {}; } catch {}
+      const done = Object.values(state).filter(Boolean).length;
+      const isToday = i === 0;
+      const complete = done === TOTAL && !isToday;
+
+      const wrap = document.createElement('div');
+      wrap.className = 'streak-day';
+
+      const dot = document.createElement('div');
+      dot.className = 'streak-dot' + (complete ? ' complete' : '') + (isToday ? ' today' : '');
+      dot.textContent = complete ? '✓' : days[d.getDay()];
+
+      const label = document.createElement('div');
+      label.className = 'streak-label';
+      label.textContent = days[d.getDay()];
+
+      wrap.appendChild(dot);
+      wrap.appendChild(label);
+      row.appendChild(wrap);
+    }
+  }
+
+  render();
+  setInterval(render, 60000);
+</script>
+</body>
+</html>
