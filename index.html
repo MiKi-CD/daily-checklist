@@ -1,62 +1,60 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Checklist Application</title>
-    <script>
-        let checklist = [];
-        let streak = 0;
-        let proteinCount = 0;
-
-        function renderChecklist() {
-            const checklistElement = document.getElementById('checklist');
-            checklistElement.innerHTML = '';
-            checklist.forEach((task, index) => {
-                const taskElement = document.createElement('div');
-                taskElement.textContent = task;
-                taskElement.onclick = () => toggleTask(index);
-                checklistElement.appendChild(taskElement);
-            });
-        }
-
-        function toggleTask(index) {
-            const taskStatus = checklist[index];
-            checklist[index] = taskStatus + ' (completed)';
-            renderChecklist();
-        }
-
-        function renderStreak() {
-            const streakElement = document.getElementById('streak');
-            streakElement.textContent = `Current Streak: ${streak}`;
-        }
-
-        function renderProtein() {
-            const proteinElement = document.getElementById('protein');
-            proteinElement.textContent = `Protein Count: ${proteinCount}`;
-        }
-
-        function renderDashboard() {
-            renderChecklist();
-            renderStreak();
-            renderProtein();
-        }
-
-        function addTask(task) {
-            checklist.push(task);
-            renderDashboard();
-        }
-
-        // Initialize with sample tasks
-        document.addEventListener('DOMContentLoaded', () => {
-            addTask('Complete project report');
-            addTask('Prepare for presentation');
-            addTask('Workout - Upper body exercises');
-        });
-    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Checklist</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <h1>My Checklist</h1>
-    <div id="checklist"></div>
-    <div id="streak"></div>
-    <div id="protein"></div>
+    <div id="checklist">
+        <h1>Daily Checklist</h1>
+        <ul id="checklist-items"></ul>
+        <input type="text" id="new-item" placeholder="Add new item...">
+        <button id="add-item">Add Item</button>
+    </div>
+    <script src="scripts.js"></script>
 </body>
 </html>
+
+<script>
+// JavaScript functions for rendering the checklist
+
+const checklistItems = [];
+
+function renderChecklist() {
+    const checklistElement = document.getElementById('checklist-items');
+    checklistElement.innerHTML = '';
+    checklistItems.forEach(item => {
+        const li = document.createElement('li');
+        li.textContent = item;
+        checklistElement.appendChild(li);
+    });
+}
+
+function renderStreak() {
+    // Placeholder function for rendering user streaks
+}
+
+function renderProtein() {
+    // Placeholder function for rendering protein intake
+}
+
+function renderDashboard() {
+    // Placeholder function for rendering overall dashboard
+}
+
+function addChecklistItem(item) {
+    checklistItems.push(item);
+    renderChecklist();
+}
+
+document.getElementById('add-item').addEventListener('click', () => {
+    const newItem = document.getElementById('new-item').value;
+    if (newItem) {
+        addChecklistItem(newItem);
+        document.getElementById('new-item').value = '';
+    }
+});
+
+</script>
