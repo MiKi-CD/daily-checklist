@@ -4,57 +4,63 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Daily Checklist</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="checklist">
-        <h1>Daily Checklist</h1>
-        <ul id="checklist-items"></ul>
-        <input type="text" id="new-item" placeholder="Add new item...">
-        <button id="add-item">Add Item</button>
-    </div>
-    <script src="scripts.js"></script>
+    <header>
+        <h1>Daily Checklist Application</h1>
+    </header>
+    <main>
+        <div id="checklist">
+            <h2>Checklist</h2>
+            <ul id="checklist-items"></ul>
+        </div>
+        <div id="streak">
+            <h2>Streaks</h2>
+            <p id="streak-count">0</p>
+        </div>
+        <div id="protein">
+            <h2>Protein Tracker</h2>
+            <p id="protein-count">0</p>
+        </div>
+        <div id="dashboard">
+            <h2>Dashboard</h2>
+            <p>Summary of your activities</p>
+        </div>
+    </main>
+    <script src="script.js"></script>
 </body>
 </html>
 
 <script>
-// JavaScript functions for rendering the checklist
-
-const checklistItems = [];
-
 function renderChecklist() {
-    const checklistElement = document.getElementById('checklist-items');
-    checklistElement.innerHTML = '';
-    checklistItems.forEach(item => {
-        const li = document.createElement('li');
-        li.textContent = item;
-        checklistElement.appendChild(li);
-    });
+    // Logic to render checklist
+    const checklistItems = document.getElementById('checklist-items');
+    checklistItems.innerHTML = '<li>Sample Item 1</li><li>Sample Item 2</li>';
 }
 
 function renderStreak() {
-    // Placeholder function for rendering user streaks
+    // Logic to render streak
+    const streakCount = document.getElementById('streak-count');
+    streakCount.textContent = '5';
 }
 
 function renderProtein() {
-    // Placeholder function for rendering protein intake
+    // Logic to render protein tracker
+    const proteinCount = document.getElementById('protein-count');
+    proteinCount.textContent = '100g';
 }
 
 function renderDashboard() {
-    // Placeholder function for rendering overall dashboard
+    // Logic to render dashboard
+    const dashboard = document.getElementById('dashboard');
+    dashboard.innerHTML += '<p>Your current progress is good.</p>';
 }
 
-function addChecklistItem(item) {
-    checklistItems.push(item);
+document.addEventListener('DOMContentLoaded', () => {
     renderChecklist();
-}
-
-document.getElementById('add-item').addEventListener('click', () => {
-    const newItem = document.getElementById('new-item').value;
-    if (newItem) {
-        addChecklistItem(newItem);
-        document.getElementById('new-item').value = '';
-    }
+    renderStreak();
+    renderProtein();
+    renderDashboard();
 });
-
 </script>
