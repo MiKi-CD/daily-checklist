@@ -1,26 +1,62 @@
-// Complete JavaScript code for index.html with all functions implemented
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Checklist Application</title>
+    <script>
+        let checklist = [];
+        let streak = 0;
+        let proteinCount = 0;
 
-function add(a, b) {
-    return a + b;
-}
+        function renderChecklist() {
+            const checklistElement = document.getElementById('checklist');
+            checklistElement.innerHTML = '';
+            checklist.forEach((task, index) => {
+                const taskElement = document.createElement('div');
+                taskElement.textContent = task;
+                taskElement.onclick = () => toggleTask(index);
+                checklistElement.appendChild(taskElement);
+            });
+        }
 
-function subtract(a, b) {
-    return a - b;
-}
+        function toggleTask(index) {
+            const taskStatus = checklist[index];
+            checklist[index] = taskStatus + ' (completed)';
+            renderChecklist();
+        }
 
-function multiply(a, b) {
-    return a * b;
-}
+        function renderStreak() {
+            const streakElement = document.getElementById('streak');
+            streakElement.textContent = `Current Streak: ${streak}`;
+        }
 
-function divide(a, b) {
-    if (b === 0) {
-        throw new Error("Cannot divide by zero");
-    }
-    return a / b;
-}
+        function renderProtein() {
+            const proteinElement = document.getElementById('protein');
+            proteinElement.textContent = `Protein Count: ${proteinCount}`;
+        }
 
-// Example usage of the functions
-console.log("Addition: ", add(5, 3));
-console.log("Subtraction: ", subtract(5, 3));
-console.log("Multiplication: ", multiply(5, 3));
-console.log("Division: ", divide(5, 3));
+        function renderDashboard() {
+            renderChecklist();
+            renderStreak();
+            renderProtein();
+        }
+
+        function addTask(task) {
+            checklist.push(task);
+            renderDashboard();
+        }
+
+        // Initialize with sample tasks
+        document.addEventListener('DOMContentLoaded', () => {
+            addTask('Complete project report');
+            addTask('Prepare for presentation');
+            addTask('Workout - Upper body exercises');
+        });
+    </script>
+</head>
+<body>
+    <h1>My Checklist</h1>
+    <div id="checklist"></div>
+    <div id="streak"></div>
+    <div id="protein"></div>
+</body>
+</html>
