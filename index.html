@@ -1,288 +1,908 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<meta name="theme-color" content="#0e0e0e">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0a0a0a">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black">
-<meta name="apple-mobile-web-app-title" content="Checklist">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="FORGE">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
-<title>Daily Checklist</title>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
-<noscript><link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"></noscript>
+<title>FORGE — Daily Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet"></noscript>
 <style>
-  :root {
-    --bg: #0e0e0e; --card: #181818; --border: #2a2a2a;
-    --accent: #c8f04a; --accent-dim: rgba(200,240,74,0.12);
-    --text: #f0f0f0; --muted: #666;
-    --done-bg: #1a1f10; --done-text: #5a6e2a;
-    --orange: #ffa03c; --orange-dim: rgba(255,160,60,0.12);
-  }
-  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-  body { background:var(--bg); color:var(--text); font-family:'DM Sans',system-ui,sans-serif; min-height:100vh; max-width:420px; margin:0 auto; padding-bottom:80px; }
+/* ── THEME TOKENS ── */
+[data-theme="dark"] {
+  --bg: #0a0a0a;
+  --surface: #121212;
+  --card: #1a1a1a;
+  --card-hover: #202020;
+  --border: #282828;
+  --border-strong: #333;
+  --accent: #c8f04a;
+  --accent-dim: rgba(200,240,74,0.10);
+  --accent-glow: rgba(200,240,74,0.25);
+  --text: #f2f2f2;
+  --text-secondary: #888;
+  --text-muted: #555;
+  --done-bg: #141a09;
+  --done-border: #243010;
+  --done-text: #6a8030;
+  --done-muted: #3a5015;
+  --orange: #ff9d3a;
+  --orange-dim: rgba(255,157,58,0.10);
+  --nav-bg: #0e0e0e;
+  --sidebar-bg: #0e0e0e;
+  --shadow: 0 4px 24px rgba(0,0,0,0.4);
+  --shadow-card: 0 2px 12px rgba(0,0,0,0.3);
+}
+[data-theme="light"] {
+  --bg: #f5f5f0;
+  --surface: #ffffff;
+  --card: #ffffff;
+  --card-hover: #f8f8f4;
+  --border: #e4e4dc;
+  --border-strong: #d0d0c8;
+  --accent: #5a8c00;
+  --accent-dim: rgba(90,140,0,0.08);
+  --accent-glow: rgba(90,140,0,0.20);
+  --text: #1a1a1a;
+  --text-secondary: #666;
+  --text-muted: #aaa;
+  --done-bg: #f0f7e6;
+  --done-border: #c8e090;
+  --done-text: #4a7020;
+  --done-muted: #8ab050;
+  --orange: #d4680a;
+  --orange-dim: rgba(212,104,10,0.08);
+  --nav-bg: #ffffff;
+  --sidebar-bg: #ffffff;
+  --shadow: 0 4px 24px rgba(0,0,0,0.08);
+  --shadow-card: 0 2px 8px rgba(0,0,0,0.06);
+}
 
-  /* NAV */
-  .bottom-nav { position:fixed; bottom:0; left:50%; transform:translateX(-50%); width:100%; max-width:420px; background:#111; border-top:1px solid var(--border); display:flex; z-index:100; }
-  .nav-btn { flex:1; padding:12px 0 10px; background:none; border:none; color:var(--muted); font-family:'DM Sans',sans-serif; font-size:10px; font-weight:500; letter-spacing:0.5px; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:4px; transition:color 0.2s; }
-  .nav-btn.active { color:var(--accent); }
-  .nav-icon { font-size:18px; }
+/* ── RESET ── */
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+html { font-size:16px; scroll-behavior:smooth; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Barlow', system-ui, sans-serif;
+  min-height: 100vh;
+  transition: background 0.3s, color 0.3s;
+  overflow-x: hidden;
+}
 
-  /* PAGES */
-  .page { display:none; }
-  .page.active { display:block; }
+/* ── LAYOUT ── */
+.app-shell {
+  display: flex;
+  min-height: 100vh;
+}
 
-  /* HEADER */
-  header { padding:28px 20px 16px; border-bottom:1px solid var(--border); position:sticky; top:0; background:var(--bg); z-index:10; }
-  .header-top { display:flex; justify-content:space-between; align-items:flex-start; }
-  .day-label { font-family:'Bebas Neue',Impact,sans-serif; font-size:38px; letter-spacing:2px; line-height:1; }
-  .date-sub { font-size:12px; color:var(--muted); margin-top:4px; font-weight:300; }
-  .progress-pill { background:var(--accent-dim); border:1px solid var(--accent); border-radius:20px; padding:6px 14px; font-family:'Bebas Neue',sans-serif; font-size:20px; color:var(--accent); letter-spacing:1px; }
-  .progress-bar-wrap { margin-top:14px; height:3px; background:var(--border); border-radius:2px; overflow:hidden; }
-  .progress-bar-fill { height:100%; background:var(--accent); border-radius:2px; transition:width 0.4s ease; }
+/* ── SIDEBAR (desktop/tablet) ── */
+.sidebar {
+  display: none;
+  width: 240px;
+  min-width: 240px;
+  background: var(--sidebar-bg);
+  border-right: 1px solid var(--border);
+  flex-direction: column;
+  position: fixed;
+  top: 0; left: 0; bottom: 0;
+  z-index: 100;
+  padding: 0;
+  transition: background 0.3s, border-color 0.3s;
+}
 
-  /* SECTIONS */
-  .section { padding:20px 20px 0; }
-  .section-title { font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); font-weight:500; margin-bottom:10px; }
+.sidebar-logo {
+  padding: 28px 24px 24px;
+  border-bottom: 1px solid var(--border);
+}
 
-  /* TASKS */
-  .task { display:flex; align-items:center; gap:14px; padding:14px 16px; background:var(--card); border:1px solid var(--border); border-radius:12px; margin-bottom:8px; cursor:pointer; transition:all 0.2s ease; user-select:none; position:relative; overflow:hidden; }
-  .task:active { transform:scale(0.98); }
-  .task.done { background:var(--done-bg); border-color:#2a3515; }
-  .task.done .task-label { color:var(--done-text); text-decoration:line-through; text-decoration-color:#3a4e1a; }
-  .task.done .task-meta { color:#3a4e1a; }
-  .checkbox { width:22px; height:22px; border-radius:50%; border:2px solid var(--border); flex-shrink:0; display:flex; align-items:center; justify-content:center; transition:all 0.2s ease; }
-  .task.done .checkbox, .protein-source.ticked .checkbox { background:var(--accent); border-color:var(--accent); }
-  .check-icon { opacity:0; transition:opacity 0.2s; font-size:12px; color:#0e0e0e; font-weight:700; }
-  .task.done .check-icon, .protein-source.ticked .check-icon { opacity:1; }
-  .task-text { flex:1; }
-  .task-label { font-size:14px; font-weight:500; line-height:1.3; transition:color 0.2s; }
-  .task-meta { font-size:11px; color:var(--muted); margin-top:2px; font-weight:300; }
-  .task-time { font-size:11px; color:var(--muted); font-weight:300; flex-shrink:0; }
-  .nonveg-badge,.veg-badge { position:absolute; right:12px; top:10px; font-size:9px; letter-spacing:1px; text-transform:uppercase; border-radius:6px; padding:2px 7px; }
-  .nonveg-badge { background:var(--orange-dim); color:var(--orange); border:1px solid rgba(255,160,60,0.3); }
-  .veg-badge { background:var(--accent-dim); color:var(--accent); border:1px solid rgba(200,240,74,0.2); }
+.logo-mark {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: 4px;
+  color: var(--accent);
+  line-height: 1;
+}
 
-  /* STREAK */
-  .streak-row { display:flex; gap:6px; padding:16px 20px 0; }
-  .streak-day { flex:1; text-align:center; }
-  .streak-dot { width:28px; height:28px; border-radius:50%; border:1px solid var(--border); margin:0 auto 4px; display:flex; align-items:center; justify-content:center; font-size:9px; color:var(--muted); font-weight:500; }
-  .streak-dot.complete { background:var(--accent); border-color:var(--accent); color:#0e0e0e; font-weight:700; }
-  .streak-dot.today { border-color:var(--accent); color:var(--accent); }
-  .streak-label { font-size:9px; color:var(--muted); }
+.logo-sub {
+  font-size: 10px;
+  color: var(--text-muted);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-top: 4px;
+}
 
-  .all-done-banner { display:none; margin:20px 20px 0; padding:16px; background:var(--accent-dim); border:1px solid var(--accent); border-radius:12px; text-align:center; }
-  .all-done-banner.show { display:block; }
-  .all-done-banner .big { font-family:'Bebas Neue',sans-serif; font-size:28px; color:var(--accent); letter-spacing:2px; }
-  .all-done-banner .sub { font-size:12px; color:#8a9a5a; margin-top:2px; }
-  .reset-btn { display:block; margin:28px 20px 0; width:calc(100% - 40px); padding:14px; background:transparent; border:1px solid var(--border); border-radius:12px; color:var(--muted); font-family:'DM Sans',sans-serif; font-size:13px; letter-spacing:1px; cursor:pointer; text-transform:uppercase; }
+.sidebar-nav {
+  flex: 1;
+  padding: 16px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
 
-  /* PROTEIN PAGE */
-  .page-header { padding:28px 20px 20px; border-bottom:1px solid var(--border); }
-  .page-title { font-family:'Bebas Neue',sans-serif; font-size:38px; letter-spacing:2px; line-height:1; }
-  .page-sub { font-size:12px; color:var(--muted); margin-top:4px; }
+.sidebar-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: 'Barlow', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: left;
+  width: 100%;
+}
 
-  .protein-total-card { margin:20px 20px 0; background:var(--card); border:1px solid var(--border); border-radius:16px; padding:20px; display:flex; justify-content:space-between; align-items:center; }
-  .protein-number { font-family:'Bebas Neue',sans-serif; font-size:56px; color:var(--accent); line-height:1; letter-spacing:2px; }
-  .protein-unit { font-size:14px; color:var(--muted); margin-top:4px; }
-  .protein-target { text-align:right; }
-  .protein-target-label { font-size:10px; color:var(--muted); letter-spacing:1px; text-transform:uppercase; }
-  .protein-target-val { font-family:'Bebas Neue',sans-serif; font-size:28px; color:var(--muted); letter-spacing:1px; }
-  .protein-bar-wrap { margin:16px 20px 0; height:6px; background:var(--border); border-radius:3px; overflow:hidden; }
-  .protein-bar-fill { height:100%; background:var(--accent); border-radius:3px; transition:width 0.4s ease; }
+.sidebar-btn:hover { background: var(--card); color: var(--text); }
+.sidebar-btn.active { background: var(--accent-dim); color: var(--accent); border: 1px solid var(--accent-glow); }
+.sidebar-btn .s-icon { font-size: 18px; width: 22px; text-align: center; }
 
-  .protein-source { display:flex; align-items:center; gap:14px; padding:14px 16px; background:var(--card); border:1px solid var(--border); border-radius:12px; margin-bottom:8px; cursor:pointer; transition:all 0.2s; user-select:none; }
-  .protein-source:active { transform:scale(0.98); }
-  .protein-source.ticked { background:var(--done-bg); border-color:#2a3515; }
-  .protein-source.ticked .ps-name { color:var(--done-text); }
-  .protein-source.ticked .ps-grams { color:#3a4e1a; }
-  .ps-text { flex:1; }
-  .ps-name { font-size:14px; font-weight:500; }
-  .ps-serving { font-size:11px; color:var(--muted); margin-top:2px; }
-  .ps-grams { font-family:'Bebas Neue',sans-serif; font-size:22px; color:var(--accent); letter-spacing:1px; }
+.sidebar-footer {
+  padding: 16px 12px 24px;
+  border-top: 1px solid var(--border);
+}
 
-  /* DASHBOARD */
-  .stat-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; padding:20px 20px 0; }
-  .stat-card { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:16px; }
-  .stat-label { font-size:10px; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); margin-bottom:8px; }
-  .stat-val { font-family:'Bebas Neue',sans-serif; font-size:40px; color:var(--accent); letter-spacing:2px; line-height:1; }
-  .stat-sub { font-size:11px; color:var(--muted); margin-top:4px; }
+/* THEME TOGGLE */
+.theme-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: var(--card);
+  border: 1px solid var(--border);
+}
 
-  .week-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:6px; padding:12px 20px 0; }
-  .week-cell { text-align:center; }
-  .week-bar-wrap { height:60px; background:var(--border); border-radius:4px; display:flex; align-items:flex-end; overflow:hidden; margin-bottom:6px; }
-  .week-bar { width:100%; background:var(--accent); border-radius:4px; transition:height 0.4s ease; }
-  .week-bar.low { background:#2a2a1a; }
-  .week-bar.mid { background:#7a9a2a; }
-  .week-day-label { font-size:9px; color:var(--muted); }
-  .week-day-val { font-size:10px; color:var(--text); font-weight:500; margin-bottom:2px; }
-  .legend { display:flex; gap:16px; padding:12px 20px 0; }
-  .legend-item { display:flex; align-items:center; gap:6px; font-size:11px; color:var(--muted); }
-  .legend-dot { width:8px; height:8px; border-radius:50%; }
+.theme-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-weight: 500;
+  letter-spacing: 0.3px;
+}
+
+.theme-toggle-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.theme-icon { font-size: 14px; }
+
+.toggle-switch {
+  position: relative;
+  width: 40px;
+  height: 22px;
+  cursor: pointer;
+}
+
+.toggle-switch input { opacity: 0; width: 0; height: 0; }
+
+.toggle-track {
+  position: absolute;
+  inset: 0;
+  background: var(--border-strong);
+  border-radius: 11px;
+  transition: background 0.3s;
+}
+
+.toggle-switch input:checked + .toggle-track { background: var(--accent); }
+
+.toggle-thumb {
+  position: absolute;
+  top: 3px; left: 3px;
+  width: 16px; height: 16px;
+  background: white;
+  border-radius: 50%;
+  transition: transform 0.3s;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+}
+
+.toggle-switch input:checked ~ .toggle-thumb { transform: translateX(18px); }
+
+/* ── MAIN CONTENT ── */
+.main-content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── TOP BAR (mobile only) ── */
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px 12px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  transition: background 0.3s;
+}
+
+.topbar-logo {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: 3px;
+  color: var(--accent);
+}
+
+.topbar-theme {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ── PAGES ── */
+.page { display: none; flex: 1; }
+.page.active { display: flex; flex-direction: column; }
+
+/* ── PAGE INNER ── */
+.page-inner {
+  flex: 1;
+  padding: 24px;
+  max-width: 900px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+/* ── PAGE HEADER ── */
+.page-head {
+  margin-bottom: 24px;
+}
+
+.page-head-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.page-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: clamp(36px, 5vw, 56px);
+  font-weight: 800;
+  letter-spacing: 3px;
+  line-height: 1;
+  color: var(--text);
+  text-transform: uppercase;
+}
+
+.page-sub {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-top: 6px;
+  font-weight: 400;
+  letter-spacing: 0.3px;
+}
+
+.progress-pill {
+  background: var(--accent-dim);
+  border: 1px solid var(--accent-glow);
+  border-radius: 24px;
+  padding: 8px 18px;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 1px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+
+.progress-bar-wrap {
+  margin-top: 16px;
+  height: 3px;
+  background: var(--border);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 2px;
+  transition: width 0.5s cubic-bezier(0.4,0,0.2,1);
+}
+
+/* ── STREAK ROW ── */
+.streak-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.streak-day { flex: 1; text-align: center; }
+
+.streak-dot {
+  width: clamp(28px, 4vw, 36px);
+  height: clamp(28px, 4vw, 36px);
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  margin: 0 auto 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  color: var(--text-muted);
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.streak-dot.complete { background: var(--accent); border-color: var(--accent); color: #0a0a0a; }
+.streak-dot.today { border-color: var(--accent); color: var(--accent); }
+.streak-label { font-size: 9px; color: var(--text-muted); letter-spacing: 0.5px; text-transform: uppercase; }
+
+/* ── ALL DONE BANNER ── */
+.all-done-banner {
+  display: none;
+  padding: 18px 20px;
+  background: var(--accent-dim);
+  border: 1px solid var(--accent-glow);
+  border-radius: 14px;
+  text-align: center;
+  margin-bottom: 20px;
+}
+.all-done-banner.show { display: block; }
+.all-done-banner .big { font-family: 'Barlow Condensed', sans-serif; font-size: 26px; font-weight: 800; color: var(--accent); letter-spacing: 3px; text-transform: uppercase; }
+.all-done-banner .sub { font-size: 12px; color: var(--done-text); margin-top: 4px; }
+
+/* ── SECTION ── */
+.section { margin-bottom: 8px; }
+.section-title {
+  font-size: 10px;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  font-weight: 600;
+  margin-bottom: 8px;
+  padding-left: 2px;
+}
+
+/* ── TASK GRID (responsive) ── */
+.task-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+}
+
+/* ── TASK CARD ── */
+.task {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 18px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
+}
+
+.task::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+  background: transparent;
+  transition: background 0.2s;
+}
+
+.task:hover { background: var(--card-hover); border-color: var(--border-strong); }
+.task:hover::before { background: var(--border-strong); }
+.task:active { transform: scale(0.99); }
+
+.task.done { background: var(--done-bg); border-color: var(--done-border); }
+.task.done::before { background: var(--accent); }
+.task.done .task-label { color: var(--done-text); text-decoration: line-through; text-decoration-color: var(--done-muted); }
+.task.done .task-meta { color: var(--done-muted); }
+.task.done .task-time { color: var(--done-muted); }
+
+.checkbox {
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  border: 2px solid var(--border-strong);
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.task.done .checkbox, .protein-source.ticked .checkbox {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.check-icon {
+  opacity: 0; transition: opacity 0.15s;
+  font-size: 11px; color: #0a0a0a; font-weight: 800;
+}
+.task.done .check-icon, .protein-source.ticked .check-icon { opacity: 1; }
+
+.task-text { flex: 1; min-width: 0; }
+.task-label { font-size: 14px; font-weight: 500; line-height: 1.3; transition: color 0.2s; }
+.task-meta { font-size: 11px; color: var(--text-secondary); margin-top: 2px; font-weight: 400; }
+.task-time { font-size: 11px; color: var(--text-muted); font-weight: 400; flex-shrink: 0; }
+
+.nonveg-badge, .veg-badge {
+  font-size: 9px; letter-spacing: 1px; text-transform: uppercase;
+  border-radius: 5px; padding: 2px 7px; flex-shrink: 0;
+}
+.nonveg-badge { background: var(--orange-dim); color: var(--orange); border: 1px solid rgba(255,157,58,0.25); }
+.veg-badge { background: var(--accent-dim); color: var(--accent); border: 1px solid var(--accent-glow); }
+
+.reset-btn {
+  display: block; margin-top: 24px; width: 100%;
+  padding: 14px; background: transparent;
+  border: 1px solid var(--border); border-radius: 12px;
+  color: var(--text-muted); font-family: 'Barlow', sans-serif;
+  font-size: 12px; font-weight: 600; letter-spacing: 2px;
+  cursor: pointer; text-transform: uppercase; transition: all 0.2s;
+}
+.reset-btn:hover { border-color: var(--border-strong); color: var(--text-secondary); }
+
+/* ── PROTEIN PAGE ── */
+.protein-total-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  box-shadow: var(--shadow-card);
+}
+
+.protein-number {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: clamp(52px, 8vw, 72px);
+  font-weight: 800;
+  color: var(--accent);
+  line-height: 1;
+  letter-spacing: 2px;
+}
+
+.protein-unit { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+
+.protein-target-label { font-size: 10px; color: var(--text-muted); letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 4px; }
+.protein-target-val {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 28px; font-weight: 700;
+  color: var(--text-secondary); letter-spacing: 1px;
+}
+
+.protein-bar-wrap { height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; margin-bottom: 20px; }
+.protein-bar-fill { height: 100%; background: var(--accent); border-radius: 3px; transition: width 0.5s cubic-bezier(0.4,0,0.2,1); }
+
+.protein-source {
+  display: flex; align-items: center; gap: 14px;
+  padding: 14px 18px; background: var(--card);
+  border: 1px solid var(--border); border-radius: 12px;
+  margin-bottom: 8px; cursor: pointer;
+  transition: all 0.2s; user-select: none;
+  box-shadow: var(--shadow-card);
+}
+.protein-source:hover { background: var(--card-hover); }
+.protein-source:active { transform: scale(0.99); }
+.protein-source.ticked { background: var(--done-bg); border-color: var(--done-border); }
+.protein-source.ticked .ps-name { color: var(--done-text); text-decoration: line-through; text-decoration-color: var(--done-muted); }
+.protein-source.ticked .ps-grams { color: var(--done-muted); }
+.ps-text { flex: 1; }
+.ps-name { font-size: 14px; font-weight: 500; }
+.ps-serving { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+.ps-grams { font-family: 'Barlow Condensed', sans-serif; font-size: 22px; font-weight: 700; color: var(--accent); letter-spacing: 1px; }
+
+/* ── DASHBOARD ── */
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.stat-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 20px;
+  box-shadow: var(--shadow-card);
+  transition: background 0.2s;
+}
+
+.stat-card:hover { background: var(--card-hover); }
+.stat-label { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px; font-weight: 600; }
+.stat-val { font-family: 'Barlow Condensed', sans-serif; font-size: clamp(36px, 4vw, 48px); font-weight: 800; color: var(--accent); letter-spacing: 2px; line-height: 1; }
+.stat-sub { font-size: 11px; color: var(--text-muted); margin-top: 6px; }
+
+.chart-section { margin-bottom: 24px; }
+.chart-title { font-size: 10px; letter-spacing: 2.5px; text-transform: uppercase; color: var(--text-muted); font-weight: 600; margin-bottom: 12px; }
+
+.week-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 20px;
+  box-shadow: var(--shadow-card);
+}
+
+.week-cell { text-align: center; }
+.week-bar-wrap { height: 70px; background: var(--border); border-radius: 6px; display: flex; align-items: flex-end; overflow: hidden; margin-bottom: 8px; }
+.week-bar { width: 100%; background: var(--accent); border-radius: 6px; transition: height 0.5s cubic-bezier(0.4,0,0.2,1); }
+.week-bar.low { background: var(--border-strong); }
+.week-bar.mid { background: #7a9a2a; }
+.week-day-label { font-size: 9px; color: var(--text-muted); letter-spacing: 0.5px; text-transform: uppercase; }
+.week-day-val { font-size: 11px; color: var(--text); font-weight: 600; margin-bottom: 4px; font-family: 'Barlow Condensed', sans-serif; letter-spacing: 0.5px; }
+
+.legend { display: flex; gap: 16px; margin-top: 10px; }
+.legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text-muted); }
+.legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+/* ── BOTTOM NAV (mobile only) ── */
+.bottom-nav {
+  display: flex;
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  background: var(--nav-bg);
+  border-top: 1px solid var(--border);
+  z-index: 100;
+  padding-bottom: env(safe-area-inset-bottom);
+  transition: background 0.3s;
+}
+
+.nav-btn {
+  flex: 1; padding: 12px 0 10px;
+  background: none; border: none;
+  color: var(--text-muted);
+  font-family: 'Barlow', sans-serif;
+  font-size: 10px; font-weight: 600;
+  letter-spacing: 0.5px; text-transform: uppercase;
+  cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  transition: color 0.2s;
+}
+
+.nav-btn.active { color: var(--accent); }
+.nav-icon { font-size: 20px; }
+
+/* ── SYNC INDICATOR ── */
+.sync-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  display: inline-block;
+  margin-left: 8px;
+  vertical-align: middle;
+  transition: background 0.3s;
+}
+.sync-dot.syncing { background: var(--accent); animation: pulse 1s infinite; }
+.sync-dot.success { background: var(--accent); }
+.sync-dot.error { background: var(--orange); }
+@keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+
+/* ── RESPONSIVE BREAKPOINTS ── */
+
+/* Tablet: 640px+ — show sidebar, hide bottom nav & topbar */
+@media (min-width: 640px) {
+  .sidebar { display: flex; }
+  .topbar { display: none; }
+  .bottom-nav { display: none; }
+  .main-content { margin-left: 240px; padding-bottom: 0; }
+  body { padding-bottom: 0; }
+
+  .task-grid { grid-template-columns: 1fr 1fr; }
+  .stat-grid { grid-template-columns: repeat(4, 1fr); }
+}
+
+/* Large tablet/small laptop: 900px+ */
+@media (min-width: 900px) {
+  .page-inner { padding: 32px 40px; }
+  .sidebar { width: 260px; }
+  .main-content { margin-left: 260px; }
+}
+
+/* Desktop: 1200px+ */
+@media (min-width: 1200px) {
+  .page-inner { padding: 40px 48px; max-width: 1100px; }
+  .week-bar-wrap { height: 90px; }
+}
+
+/* Mobile: pad bottom for fixed nav */
+@media (max-width: 639px) {
+  body { padding-bottom: 68px; }
+  .page-inner { padding: 20px 16px; }
+}
 </style>
 </head>
 <body>
+<div class="app-shell">
 
-<!-- CHECKLIST PAGE -->
-<div class="page active" id="page-checklist">
-  <header>
-    <div class="header-top">
-      <div>
-        <div class="day-label" id="dayLabel">MONDAY</div>
-        <div class="date-sub" id="dateLabel">Loading...</div>
+  <!-- SIDEBAR (tablet/desktop) -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark">FORGE</div>
+      <div class="logo-sub">Daily Tracker · Phase 1</div>
+    </div>
+    <nav class="sidebar-nav">
+      <button class="sidebar-btn active" onclick="showPage('checklist',this)" id="sb-checklist">
+        <span class="s-icon">⚡</span> Checklist
+      </button>
+      <button class="sidebar-btn" onclick="showPage('protein',this)" id="sb-protein">
+        <span class="s-icon">🥚</span> Protein
+      </button>
+      <button class="sidebar-btn" onclick="showPage('dashboard',this)" id="sb-dashboard">
+        <span class="s-icon">📊</span> Dashboard
+      </button>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="theme-row">
+        <span class="theme-label">Dark Mode</span>
+        <div class="theme-toggle-wrap">
+          <span class="theme-icon">☀️</span>
+          <label class="toggle-switch">
+            <input type="checkbox" id="themeToggleSidebar" checked onchange="handleThemeToggle(this)">
+            <div class="toggle-track"></div>
+            <div class="toggle-thumb"></div>
+          </label>
+          <span class="theme-icon">🌙</span>
+        </div>
       </div>
-      <div class="progress-pill" id="progressPill">0/8</div>
     </div>
-    <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progressBar" style="width:0%"></div></div>
-  </header>
+  </aside>
 
-  <div class="streak-row" id="streakRow"></div>
-  <div class="all-done-banner" id="allDoneBanner">
-    <div class="big">LOCKED IN 🔒</div>
-    <div class="sub">All done for today. Rest, recover, repeat.</div>
-  </div>
+  <!-- MAIN -->
+  <div class="main-content">
 
-  <div class="section">
-    <div class="section-title">Morning</div>
-    <div class="task" data-id="wake" onclick="toggleTask(this)">
-      <div class="checkbox"><span class="check-icon">✓</span></div>
-      <div class="task-text"><div class="task-label">Wake up</div><div class="task-meta">Out of bed, no snooze</div></div>
-      <div class="task-time">7:30 AM</div>
+    <!-- TOPBAR (mobile only) -->
+    <div class="topbar">
+      <div class="topbar-logo">FORGE ⚡</div>
+      <div class="topbar-theme">
+        <span style="font-size:12px;color:var(--text-muted);margin-right:6px;">☀️</span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="themeToggleMobile" checked onchange="handleThemeToggle(this)">
+          <div class="toggle-track"></div>
+          <div class="toggle-thumb"></div>
+        </label>
+        <span style="font-size:12px;color:var(--text-muted);margin-left:6px;">🌙</span>
+      </div>
     </div>
-    <div class="task" data-id="breakfast" onclick="toggleTask(this)">
-      <div class="checkbox"><span class="check-icon">✓</span></div>
-      <div class="task-text"><div class="task-label">Breakfast within 30 mins</div><div class="task-meta" id="eggMeta">Loading...</div></div>
-      <div class="task-time">8:00 AM</div>
-    </div>
-  </div>
 
-  <div class="section">
-    <div class="section-title">Afternoon</div>
-    <div class="task" data-id="lunch" onclick="toggleTask(this)">
-      <div class="checkbox"><span class="check-icon">✓</span></div>
-      <div class="task-text"><div class="task-label">Lunch</div><div class="task-meta">Full plate — rice + dal/curry. Don't restrict.</div></div>
-      <div class="task-time">1:00 PM</div>
-    </div>
-    <div class="task" data-id="curd" onclick="toggleTask(this)">
-      <div class="checkbox"><span class="check-icon">✓</span></div>
-      <div class="task-text"><div class="task-label">Curd</div><div class="task-meta">200g — 1 small bowl with lunch</div></div>
-      <div class="task-time">1:00 PM</div>
-    </div>
-  </div>
+    <!-- ═══ PAGE: CHECKLIST ═══ -->
+    <div class="page active" id="page-checklist">
+      <div class="page-inner">
+        <div class="page-head">
+          <div class="page-head-row">
+            <div>
+              <div class="page-title" id="dayLabel">MONDAY</div>
+              <div class="page-sub" id="dateLabel">Loading... <span class="sync-dot" id="syncDot"></span></div>
+            </div>
+            <div class="progress-pill" id="progressPill">0/8</div>
+          </div>
+          <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progressBar" style="width:0%"></div></div>
+        </div>
 
-  <div class="section">
-    <div class="section-title">Evening</div>
-    <div class="task" data-id="peanuts" onclick="toggleTask(this)">
-      <div class="checkbox"><span class="check-icon">✓</span></div>
-      <div class="task-text"><div class="task-label">Peanuts snack</div><div class="task-meta">30g — one closed fistful</div></div>
-      <div class="task-time">6:00 PM</div>
-    </div>
-  </div>
+        <div class="streak-row" id="streakRow"></div>
 
-  <div class="section">
-    <div class="section-title">Night</div>
-    <div class="task" data-id="dinner" onclick="toggleTask(this)">
-      <div class="checkbox"><span class="check-icon">✓</span></div>
-      <div class="task-text"><div class="task-label">Dinner</div><div class="task-meta">Full meal — hard cap</div></div>
-      <div class="task-time">8:00 PM</div>
-    </div>
-    <div class="task" data-id="nodinner" onclick="toggleTask(this)">
-      <div class="checkbox"><span class="check-icon">✓</span></div>
-      <div class="task-text"><div class="task-label">No eating after 9 PM</div><div class="task-meta">Kitchen closed</div></div>
-      <div class="task-time">9:00 PM</div>
-    </div>
-    <div class="task" data-id="sleep" onclick="toggleTask(this)">
-      <div class="checkbox"><span class="check-icon">✓</span></div>
-      <div class="task-text"><div class="task-label">Sleep</div><div class="task-meta">Phone down, lights off</div></div>
-      <div class="task-time">11:30 PM</div>
-    </div>
-  </div>
-  <button class="reset-btn" onclick="resetDay()">↺ Reset Today</button>
-</div>
+        <div class="all-done-banner" id="allDoneBanner">
+          <div class="big">⚡ Locked In</div>
+          <div class="sub">All 8 tasks done. Rest, recover, repeat.</div>
+        </div>
 
-<!-- PROTEIN PAGE -->
-<div class="page" id="page-protein">
-  <div class="page-header">
-    <div class="page-title" id="proteinDayLabel">MONDAY</div>
-    <div class="page-sub">Tick everything you had today</div>
-  </div>
-  <div class="protein-total-card">
-    <div>
-      <div class="protein-number" id="proteinTotal">0</div>
-      <div class="protein-unit">grams today</div>
+        <div class="section">
+          <div class="section-title">Morning</div>
+          <div class="task-grid">
+            <div class="task" data-id="wake" onclick="toggleTask(this)">
+              <div class="checkbox"><span class="check-icon">✓</span></div>
+              <div class="task-text"><div class="task-label">Wake up</div><div class="task-meta">Out of bed, no snooze</div></div>
+              <div class="task-time">7:30 AM</div>
+            </div>
+            <div class="task" data-id="breakfast" onclick="toggleTask(this)">
+              <div class="checkbox"><span class="check-icon">✓</span></div>
+              <div class="task-text"><div class="task-label">Breakfast within 30 mins</div><div class="task-meta" id="eggMeta">Loading...</div></div>
+              <div class="task-time">8:00 AM</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">Afternoon</div>
+          <div class="task-grid">
+            <div class="task" data-id="lunch" onclick="toggleTask(this)">
+              <div class="checkbox"><span class="check-icon">✓</span></div>
+              <div class="task-text"><div class="task-label">Lunch</div><div class="task-meta">Full plate — rice + dal/curry. Don't restrict.</div></div>
+              <div class="task-time">1:00 PM</div>
+            </div>
+            <div class="task" data-id="curd" onclick="toggleTask(this)">
+              <div class="checkbox"><span class="check-icon">✓</span></div>
+              <div class="task-text"><div class="task-label">Curd</div><div class="task-meta">200g — 1 small bowl with lunch</div></div>
+              <div class="task-time">1:00 PM</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">Evening</div>
+          <div class="task-grid">
+            <div class="task" data-id="peanuts" onclick="toggleTask(this)">
+              <div class="checkbox"><span class="check-icon">✓</span></div>
+              <div class="task-text"><div class="task-label">Peanuts snack</div><div class="task-meta">30g — one closed fistful</div></div>
+              <div class="task-time">6:00 PM</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">Night</div>
+          <div class="task-grid">
+            <div class="task" data-id="dinner" onclick="toggleTask(this)">
+              <div class="checkbox"><span class="check-icon">✓</span></div>
+              <div class="task-text"><div class="task-label">Dinner</div><div class="task-meta">Full meal — hard cap</div></div>
+              <div class="task-time">8:00 PM</div>
+            </div>
+            <div class="task" data-id="nodinner" onclick="toggleTask(this)">
+              <div class="checkbox"><span class="check-icon">✓</span></div>
+              <div class="task-text"><div class="task-label">No eating after 9 PM</div><div class="task-meta">Kitchen closed</div></div>
+              <div class="task-time">9:00 PM</div>
+            </div>
+            <div class="task" data-id="sleep" onclick="toggleTask(this)">
+              <div class="checkbox"><span class="check-icon">✓</span></div>
+              <div class="task-text"><div class="task-label">Sleep</div><div class="task-meta">Phone down, lights off</div></div>
+              <div class="task-time">11:30 PM</div>
+            </div>
+          </div>
+        </div>
+
+        <button class="reset-btn" onclick="resetDay()">↺ Reset Today</button>
+      </div>
     </div>
-    <div class="protein-target">
-      <div class="protein-target-label">Target</div>
-      <div class="protein-target-val" id="proteinTargetVal">95G</div>
+
+    <!-- ═══ PAGE: PROTEIN ═══ -->
+    <div class="page" id="page-protein">
+      <div class="page-inner">
+        <div class="page-head">
+          <div class="page-title" id="proteinDayLabel">MONDAY</div>
+          <div class="page-sub">Tap everything you had today</div>
+        </div>
+
+        <div class="protein-total-card">
+          <div>
+            <div class="protein-number" id="proteinTotal">0</div>
+            <div class="protein-unit">grams today</div>
+          </div>
+          <div>
+            <div class="protein-target-label">Daily Target</div>
+            <div class="protein-target-val" id="proteinTargetVal">95G</div>
+          </div>
+        </div>
+        <div class="protein-bar-wrap"><div class="protein-bar-fill" id="proteinBar" style="width:0%"></div></div>
+
+        <div id="proteinSources"></div>
+      </div>
     </div>
-  </div>
-  <div class="protein-bar-wrap"><div class="protein-bar-fill" id="proteinBar" style="width:0%"></div></div>
-  <div class="section" id="proteinSources"><div class="section-title">Protein Sources</div></div>
-</div>
 
-<!-- DASHBOARD PAGE -->
-<div class="page" id="page-dashboard">
-  <div class="page-header">
-    <div class="page-title">WEEKLY REVIEW</div>
-    <div class="page-sub" id="dashWeekLabel">Last 7 days</div>
-  </div>
-  <div class="stat-grid">
-    <div class="stat-card"><div class="stat-label">Checklist Days</div><div class="stat-val" id="statDays">0/7</div><div class="stat-sub">full completions</div></div>
-    <div class="stat-card"><div class="stat-label">Avg Protein</div><div class="stat-val" id="statProtein">0g</div><div class="stat-sub">per day this week</div></div>
-    <div class="stat-card"><div class="stat-label">Best Streak</div><div class="stat-val" id="statStreak">0</div><div class="stat-sub">consecutive days</div></div>
-    <div class="stat-card"><div class="stat-label">Overall Score</div><div class="stat-val" id="statScore">0%</div><div class="stat-sub">checklist + protein</div></div>
-  </div>
+    <!-- ═══ PAGE: DASHBOARD ═══ -->
+    <div class="page" id="page-dashboard">
+      <div class="page-inner">
+        <div class="page-head">
+          <div class="page-title">Dashboard</div>
+          <div class="page-sub" id="dashWeekLabel">Last 7 days</div>
+        </div>
 
-  <div class="section" style="margin-top:20px"><div class="section-title">Checklist — Last 7 Days</div></div>
-  <div class="week-grid" id="checklistWeekGrid"></div>
+        <div class="stat-grid">
+          <div class="stat-card"><div class="stat-label">Checklist Days</div><div class="stat-val" id="statDays">0/7</div><div class="stat-sub">full completions</div></div>
+          <div class="stat-card"><div class="stat-label">Avg Protein</div><div class="stat-val" id="statProtein">0g</div><div class="stat-sub">per day this week</div></div>
+          <div class="stat-card"><div class="stat-label">Best Streak</div><div class="stat-val" id="statStreak">0</div><div class="stat-sub">consecutive days</div></div>
+          <div class="stat-card"><div class="stat-label">Overall Score</div><div class="stat-val" id="statScore">0%</div><div class="stat-sub">checklist + protein</div></div>
+        </div>
 
-  <div class="section" style="margin-top:20px"><div class="section-title">Protein — Last 7 Days</div></div>
-  <div class="legend">
-    <div class="legend-item"><div class="legend-dot" style="background:#2a2a1a"></div>Low</div>
-    <div class="legend-item"><div class="legend-dot" style="background:#7a9a2a"></div>Mid</div>
-    <div class="legend-item"><div class="legend-dot" style="background:var(--accent)"></div>On target</div>
-  </div>
-  <div class="week-grid" id="proteinWeekGrid"></div>
-</div>
+        <div class="chart-section">
+          <div class="chart-title">Checklist Completion — Last 7 Days</div>
+          <div class="week-grid" id="checklistWeekGrid"></div>
+        </div>
 
-<!-- BOTTOM NAV -->
+        <div class="chart-section">
+          <div class="chart-title">Protein Intake — Last 7 Days</div>
+          <div class="week-grid" id="proteinWeekGrid"></div>
+          <div class="legend">
+            <div class="legend-item"><div class="legend-dot" style="background:var(--border-strong)"></div>None / Low</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#7a9a2a"></div>Making progress</div>
+            <div class="legend-item"><div class="legend-dot" style="background:var(--accent)"></div>On target</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /main-content -->
+</div><!-- /app-shell -->
+
+<!-- BOTTOM NAV (mobile only) -->
 <nav class="bottom-nav">
-  <button class="nav-btn active" onclick="showPage('checklist',this)"><span class="nav-icon">✓</span>Checklist</button>
+  <button class="nav-btn active" onclick="showPage('checklist',this)"><span class="nav-icon">⚡</span>Checklist</button>
   <button class="nav-btn" onclick="showPage('protein',this)"><span class="nav-icon">🥚</span>Protein</button>
   <button class="nav-btn" onclick="showPage('dashboard',this)"><span class="nav-icon">📊</span>Dashboard</button>
 </nav>
 
 <script>
+  const API = 'https://script.google.com/macros/s/AKfycbzDNBAMLCCnZnUvLLTFvALpq9xVU3H8f_Kjzr29F3m9Z3pym4Bj6TzYAJT8RkJKZgLjng/exec';
   const TASKS = ['wake','breakfast','lunch','curd','peanuts','dinner','nodinner','sleep'];
   const TOTAL = TASKS.length;
-  const NON_VEG_DAYS = [0,1,3,5];
-
-  const SOURCES_VEG = [
-    {id:'eggs_v',name:'Eggs',serving:'5 eggs',g:30},
-    {id:'dal_l',name:'Dal (Lunch)',serving:'1 katori',g:8},
-    {id:'dal_d',name:'Dal (Dinner)',serving:'1 katori',g:8},
-    {id:'curd',name:'Curd',serving:'200g bowl',g:7},
-    {id:'rice_l',name:'Rice Meal (Lunch)',serving:'1 plate',g:8},
-    {id:'rice_d',name:'Rice Meal (Dinner)',serving:'1 plate',g:8},
-    {id:'peanuts',name:'Peanuts',serving:'30g fistful',g:8},
-  ];
-
-  const SOURCES_NV = [
-    {id:'eggs_nv',name:'Eggs',serving:'3 eggs',g:18},
-    {id:'chicken',name:'Chicken / Fish',serving:'150g cooked',g:32},
-    {id:'dal_l',name:'Dal (Lunch)',serving:'1 katori',g:8},
-    {id:'dal_d',name:'Dal (Dinner)',serving:'1 katori',g:8},
-    {id:'curd',name:'Curd',serving:'200g bowl',g:7},
-    {id:'rice_l',name:'Rice Meal (Lunch)',serving:'1 plate',g:8},
-    {id:'rice_d',name:'Rice Meal (Dinner)',serving:'1 plate',g:8},
-    {id:'peanuts',name:'Peanuts',serving:'30g fistful',g:8},
-  ];
-
+  const NON_VEG_DAYS = [0,1,3,5]; // Sun Mon Wed Fri
   const DAY_NAMES = ['SUNDAY','MONDAY','TUESDAY','WEDNESDAY','THURSDAY','FRIDAY','SATURDAY'];
   const DAY_SHORT = ['S','M','T','W','T','F','S'];
   const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
+  const SOURCES_VEG = [
+    {id:'eggs_v', name:'Eggs', serving:'5 eggs', g:30},
+    {id:'dal_l',  name:'Dal (Lunch)', serving:'1 katori', g:8},
+    {id:'dal_d',  name:'Dal (Dinner)', serving:'1 katori', g:8},
+    {id:'curd',   name:'Curd', serving:'200g bowl', g:7},
+    {id:'rice_l', name:'Rice Meal (Lunch)', serving:'1 plate', g:8},
+    {id:'rice_d', name:'Rice Meal (Dinner)', serving:'1 plate', g:8},
+    {id:'peanuts',name:'Peanuts', serving:'30g fistful', g:8},
+  ];
+  const SOURCES_NV = [
+    {id:'eggs_nv', name:'Eggs', serving:'3 eggs', g:18},
+    {id:'chicken', name:'Chicken / Fish', serving:'150g cooked', g:32},
+    {id:'dal_l',   name:'Dal (Lunch)', serving:'1 katori', g:8},
+    {id:'dal_d',   name:'Dal (Dinner)', serving:'1 katori', g:8},
+    {id:'curd',    name:'Curd', serving:'200g bowl', g:7},
+    {id:'rice_l',  name:'Rice Meal (Lunch)', serving:'1 plate', g:8},
+    {id:'rice_d',  name:'Rice Meal (Dinner)', serving:'1 plate', g:8},
+    {id:'peanuts', name:'Peanuts', serving:'30g fistful', g:8},
+  ];
+
+  // ── THEME ──
+  function detectSystemTheme() {
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  }
+
+  function applyTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    const isDark = theme === 'dark';
+    document.getElementById('themeToggleSidebar').checked = isDark;
+    document.getElementById('themeToggleMobile').checked = isDark;
+    localStorage.setItem('theme', theme);
+  }
+
+  function handleThemeToggle(el) {
+    const theme = el.checked ? 'dark' : 'light';
+    applyTheme(theme);
+    // Sync both toggles
+    document.getElementById('themeToggleSidebar').checked = el.checked;
+    document.getElementById('themeToggleMobile').checked = el.checked;
+  }
+
+  function initTheme() {
+    const saved = localStorage.getItem('theme');
+    const theme = saved || detectSystemTheme();
+    applyTheme(theme);
+    // Listen for system theme changes
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+      if (!localStorage.getItem('theme')) applyTheme(e.matches ? 'dark' : 'light');
+    });
+  }
+
+  // ── STORAGE ──
   function dow(d){ return (d||new Date()).getDay(); }
   function isNV(d){ return NON_VEG_DAYS.includes(dow(d)); }
   function clKey(d){ d=d||new Date(); return `cl_${d.getFullYear()}_${d.getMonth()}_${d.getDate()}`; }
@@ -290,29 +910,68 @@
   function load(k){ try{return JSON.parse(localStorage.getItem(k))||{};}catch{return{};} }
   function save(k,v){ localStorage.setItem(k,JSON.stringify(v)); }
 
-  function showPage(name,btn){
+  // ── NAVIGATION ──
+  function showPage(name, btn) {
     document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-    document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.nav-btn, .sidebar-btn').forEach(b=>b.classList.remove('active'));
     document.getElementById('page-'+name).classList.add('active');
+    // Activate matching nav buttons
     btn.classList.add('active');
+    const mirror = document.getElementById('sb-'+name);
+    if(mirror && mirror !== btn) mirror.classList.add('active');
+    const mobileMap = { checklist: 0, protein: 1, dashboard: 2 };
+    const mobileNavBtns = document.querySelectorAll('.bottom-nav .nav-btn');
+    if(mobileNavBtns[mobileMap[name]]) mobileNavBtns[mobileMap[name]].classList.add('active');
     if(name==='protein') renderProtein();
     if(name==='dashboard') renderDashboard();
   }
 
+  // ── SYNC ──
+  function setSyncState(state) {
+    const dot = document.getElementById('syncDot');
+    if(!dot) return;
+    dot.className = 'sync-dot ' + state;
+  }
+
+  function syncToSheet() {
+    try {
+      const now = new Date();
+      const nv = isNV();
+      const sources = nv ? SOURCES_NV : SOURCES_VEG;
+      const target = nv ? 95 : 88;
+      const cs = load(clKey()); const ps = load(prKey());
+      let totalProtein = 0;
+      sources.forEach(src => { if(ps[src.id]) totalProtein += src.g; });
+      const checklistDone = TASKS.filter(id => cs[id]).length;
+      const payload = {
+        date: `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`,
+        day: DAY_NAMES[dow()], isNonVeg: nv,
+        tasks: { wake:!!cs.wake, breakfast:!!cs.breakfast, lunch:!!cs.lunch, curd:!!cs.curd, peanuts:!!cs.peanuts, dinner:!!cs.dinner, nodinner:!!cs.nodinner, sleep:!!cs.sleep },
+        checklistDone, checklistTotal: TOTAL,
+        protein: { eggs:!!(ps.eggs_v||ps.eggs_nv), chicken:!!ps.chicken, dal_l:!!ps.dal_l, dal_d:!!ps.dal_d, curd:!!ps.curd, rice_l:!!ps.rice_l, rice_d:!!ps.rice_d, peanuts:!!ps.peanuts },
+        totalProtein, proteinTarget: target
+      };
+      setSyncState('syncing');
+      fetch(API, { method:'POST', body:JSON.stringify(payload) })
+        .then(() => setSyncState('success'))
+        .catch(() => setSyncState('error'));
+    } catch(e) { setSyncState('error'); }
+  }
+
+  // ── ACTIONS ──
   function toggleTask(el){
-    const s=load(clKey()); s[el.dataset.id]=!s[el.dataset.id]; save(clKey(),s); renderChecklist();
+    const s=load(clKey()); s[el.dataset.id]=!s[el.dataset.id]; save(clKey(),s); renderChecklist(); syncToSheet();
   }
-
   function resetDay(){ localStorage.removeItem(clKey()); renderChecklist(); }
-
   function toggleProtein(el){
-    const s=load(prKey()); s[el.dataset.id]=!s[el.dataset.id]; save(prKey(),s); renderProtein();
+    const s=load(prKey()); s[el.dataset.id]=!s[el.dataset.id]; save(prKey(),s); renderProtein(); syncToSheet();
   }
 
+  // ── RENDER CHECKLIST ──
   function renderChecklist(){
     const now=new Date(), d=dow();
     document.getElementById('dayLabel').textContent=DAY_NAMES[d];
-    document.getElementById('dateLabel').textContent=`${now.getDate()} ${MONTHS[now.getMonth()]} ${now.getFullYear()} · Phase 1`;
+    document.getElementById('dateLabel').innerHTML=`${now.getDate()} ${MONTHS[now.getMonth()]} ${now.getFullYear()} · Phase 1 <span class="sync-dot" id="syncDot"></span>`;
     const nv=isNV(); const eggs=nv?3:5;
     document.getElementById('eggMeta').textContent=`${eggs} eggs + family breakfast`;
     const bf=document.querySelector('[data-id="breakfast"]');
@@ -343,8 +1002,9 @@
     }
   }
 
+  // ── RENDER PROTEIN ──
   function renderProtein(){
-    const now=new Date(), d=dow();
+    const d=dow();
     document.getElementById('proteinDayLabel').textContent=DAY_NAMES[d];
     const sources=isNV()?SOURCES_NV:SOURCES_VEG;
     const target=isNV()?95:88;
@@ -353,8 +1013,8 @@
     sources.forEach(src=>{ if(s[src.id]) total+=src.g; });
     document.getElementById('proteinTotal').textContent=total;
     document.getElementById('proteinBar').style.width=`${Math.min(100,(total/target)*100)}%`;
-    const container=document.getElementById('proteinSources');
-    container.innerHTML='<div class="section-title">Protein Sources</div>';
+    const container=document.getElementById('proteinSources'); container.innerHTML='';
+    const secTitle=document.createElement('div'); secTitle.className='section-title'; secTitle.textContent='Protein Sources'; container.appendChild(secTitle);
     sources.forEach(src=>{
       const el=document.createElement('div'); el.className='protein-source'+(s[src.id]?' ticked':'');
       el.dataset.id=src.id; el.onclick=function(){toggleProtein(this);};
@@ -363,10 +1023,11 @@
     });
   }
 
+  // ── RENDER DASHBOARD ──
   function renderDashboard(){
     const now=new Date();
     const ws=new Date(now); ws.setDate(now.getDate()-6);
-    document.getElementById('dashWeekLabel').textContent=`${ws.getDate()} ${MONTHS[ws.getMonth()]} — ${now.getDate()} ${MONTHS[now.getMonth()]}`;
+    document.getElementById('dashWeekLabel').textContent=`${ws.getDate()} ${MONTHS[ws.getMonth()]} — ${now.getDate()} ${MONTHS[now.getMonth()]} ${now.getFullYear()}`;
     let totalDone=0,totalProtein=0,proteinDays=0,tempStreak=0,maxStreak=0;
     const clData=[],prData=[];
     for(let i=6;i>=0;i--){
@@ -393,7 +1054,7 @@
     clData.forEach(d=>{
       const pct=(d.done/TOTAL)*100;
       const cell=document.createElement('div'); cell.className='week-cell';
-      cell.innerHTML=`<div class="week-day-val">${d.done}</div><div class="week-bar-wrap"><div class="week-bar ${pct<40?'low':pct<80?'mid':''}" style="height:${pct}%"></div></div><div class="week-day-label">${d.day}</div>`;
+      cell.innerHTML=`<div class="week-day-val">${d.done}/${TOTAL}</div><div class="week-bar-wrap"><div class="week-bar ${pct<40?'low':pct<80?'mid':''}" style="height:${Math.max(2,pct)}%"></div></div><div class="week-day-label">${d.day}</div>`;
       clGrid.appendChild(cell);
     });
 
@@ -401,15 +1062,18 @@
     prData.forEach(d=>{
       const pct=Math.min(100,(d.protein/d.target)*100);
       const cell=document.createElement('div'); cell.className='week-cell';
-      cell.innerHTML=`<div class="week-day-val">${d.protein>0?d.protein+'g':'-'}</div><div class="week-bar-wrap"><div class="week-bar ${pct<40?'low':pct<75?'mid':''}" style="height:${pct}%"></div></div><div class="week-day-label">${d.day}</div>`;
+      cell.innerHTML=`<div class="week-day-val">${d.protein>0?d.protein+'g':'-'}</div><div class="week-bar-wrap"><div class="week-bar ${pct<40?'low':pct<75?'mid':''}" style="height:${Math.max(2,pct)}%"></div></div><div class="week-day-label">${d.day}</div>`;
       prGrid.appendChild(cell);
     });
   }
 
+  // ── INIT ──
   if('serviceWorker' in navigator) window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js'));
-  document.addEventListener('DOMContentLoaded', function() {
+
+  document.addEventListener('DOMContentLoaded', function(){
+    initTheme();
     renderChecklist();
-    setInterval(renderChecklist,60000);
+    setInterval(renderChecklist, 60000);
   });
 </script>
 </body>
