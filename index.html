@@ -31,36 +31,3 @@
     <script src="script.js"></script>
 </body>
 </html>
-
-<script>
-function renderChecklist() {
-    // Logic to render checklist
-    const checklistItems = document.getElementById('checklist-items');
-    checklistItems.innerHTML = '<li>Sample Item 1</li><li>Sample Item 2</li>';
-}
-
-function renderStreak() {
-    // Logic to render streak
-    const streakCount = document.getElementById('streak-count');
-    streakCount.textContent = '5';
-}
-
-function renderProtein() {
-    // Logic to render protein tracker
-    const proteinCount = document.getElementById('protein-count');
-    proteinCount.textContent = '100g';
-}
-
-function renderDashboard() {
-    // Logic to render dashboard
-    const dashboard = document.getElementById('dashboard');
-    dashboard.innerHTML += '<p>Your current progress is good.</p>';
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-    renderChecklist();
-    renderStreak();
-    renderProtein();
-    renderDashboard();
-});
-</script>
